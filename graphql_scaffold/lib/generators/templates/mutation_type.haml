@@ -1,0 +1,8 @@
+module Types
+  module Admin
+    class MutationType < Types::BaseObject
+
+      has_admin_mutation :<%= class_name %>
+    end
+  end
+end

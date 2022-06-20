@@ -1,0 +1,17 @@
+require 'rails_helper'
+
+RSpec.describe Resolvers::<%= class_name %>, type: :request do
+  let(:query) do
+    <<-GRAPHQL
+      query {
+        <%= class_name.underscore %>()
+      }
+    GRAPHQL
+  end
+
+  describe '#resolve' do
+    it 'pass' do
+     
+    end
+  end
+end

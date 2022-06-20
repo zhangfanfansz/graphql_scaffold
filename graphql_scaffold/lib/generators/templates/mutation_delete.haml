@@ -1,0 +1,12 @@
+module Mutations
+  module Admin
+    class <%= class_name %>s::Delete<%= class_name %> < BaseAdminMutation
+
+      type Types::Admin::<%= class_name %>Type
+
+      def resolve(id:, **args)
+        
+      end
+    end
+  end
+end

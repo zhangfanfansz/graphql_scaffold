@@ -1,0 +1,68 @@
+module Types
+  class BaseObject < GraphQL::Schema::Object
+
+    def self.has_admin_fields(attach_sttr, **conf)
+      attach_sttr = attach_sttr.to_s
+      get_one = attach_sttr
+      get_many = "all_#{attach_sttr.underscore.pluralize}"
+      get_many_meta = "_all_#{attach_sttr.underscore.pluralize}_meta"
+      type_class = conf[:type_class] || 'Admin'
+      filter_query = conf[:filter_query] || false
+      class_eval %(
+        field :#{get_one}, Types::#{type_class}::#{attach_sttr}Type, null: true do
+          argument :id, ID, required: true
+        end
+        field :#{get_many}, [Types::#{type_class}::#{attach_sttr}Type], null: true do
+          argument :filter, Types::Inputs::Admin::#{attach_sttr}Filter, required: false
+          argument :page, Integer, required: false
+          argument :per_page, Integer, required: false
+          argument :sort_field, String, required: false
+          argument :sort_order, String, required: false
+        end
+        field :#{get_many_meta}, Types::Admin::ListMetadataType, null: true do
+          argument :filter, Types::Inputs::Admin::#{attach_sttr}Filter, required: false
+          argument :page, Integer, required: false
+          argument :per_page, Integer, required: false
+        end
+
+        def #{get_one}(id:)
+          #{get_one}.find_by_id(id)
+        end
+
+        def #{get_many}(filter:, **args)
+          if args[:sort_field] && args[:sort_order] && args[:page] && args[:per_page]
+            if #{filter_query}
+              filter.order("\#{args[:sort_field]} \#{args[:sort_order]}").page(args[:page] + 1).per(args[:per_page])
+            else
+              #{get_one}.where(filter).order("\#{args[:sort_field]} \#{args[:sort_order]}").page(args[:page] + 1).per(args[:per_page])
+            end
+          else
+            if #{filter_query}
+              filter
+            else
+              #{get_one}.where(filter)
+            end
+          end
+        end
+
+        def #{get_many_meta}(filter:, **args)
+          if #{filter_query}
+            { count: filter.count('DISTINCT #{attach_sttr.underscore.pluralize}.id') }
+          else
+            { count: #{get_one}.where(filter).count }
+          end
+        end
+      ), __FILE__, __LINE__ - 44
+    end
+
+    def self.has_admin_mutation(attach_sttr, **_conf)
+      attach_sttr = attach_sttr.to_s
+
+      class_eval %(
+        field :create_#{attach_sttr.underscore}, mutation: Mutations::Admin::#{attach_sttr.pluralize}::Create#{attach_sttr} if defined?(Mutations::Admin::#{attach_sttr.pluralize}::Create#{attach_sttr})
+        field :update_#{attach_sttr.underscore}, mutation: Mutations::Admin::#{attach_sttr.pluralize}::Update#{attach_sttr} if defined?(Mutations::Admin::#{attach_sttr.pluralize}::Update#{attach_sttr})
+        field :delete_#{attach_sttr.underscore}, mutation: Mutations::Admin::#{attach_sttr.pluralize}::Delete#{attach_sttr} if defined?(Mutations::Admin::#{attach_sttr.pluralize}::Delete#{attach_sttr})
+      ), __FILE__, __LINE__ - 4
+    end
+  end
+end

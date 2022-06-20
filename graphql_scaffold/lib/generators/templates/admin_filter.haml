@@ -1,0 +1,17 @@
+module Types
+  module Inputs
+    module Admin
+      class <%= class_name %> < Types::BaseInputObject
+        argument :ids, [ID], required: false
+
+        def prepare
+          if ids
+            ['id in (:ids)', { ids: ids }]
+          else
+            []
+          end
+        end
+      end
+    end
+  end
+end
