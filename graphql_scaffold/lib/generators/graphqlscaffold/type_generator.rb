@@ -59,7 +59,7 @@ module Graphqlscaffold
       def create_base_object_file
         base_object_dir_path = 'app/graphql/types'
         generator_dir_path = base_object_dir_path
-        generator_path = generator_dir_path.concat('/base_object.rb')
+        generator_path = generator_dir_path + '/base_object.rb'
 
         FileUtils.mkdir_p(base_object_dir_path) unless File.exist?(base_object_dir_path)
         FileUtils.mkdir_p(generator_dir_path) unless File.exist?(generator_dir_path)
